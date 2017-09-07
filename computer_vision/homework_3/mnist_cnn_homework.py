@@ -12,13 +12,12 @@ stops increasing, or using model ensembling techniques, etc.
 
 from __future__ import print_function
 
-import os
-
 import keras
+import os
 from keras import backend as k
 from keras import optimizers
 from keras.datasets import mnist
-from keras.layers.core import Dense, Dropout, Activation
+from keras.layers import Conv2D, Dense, Flatten, MaxPooling2D
 from keras.models import Sequential
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -52,10 +51,10 @@ else:
 # so that they are in the range of (0, 1) for (-1, 1)
 # Your code here.
 # 为了快速收敛，我们可以标准化输入值。所以它们的范围从（0，1）到（-1，1）
-x_train = x_train.reshape(x_train.shape[0], img_rows * img_cols)
-x_test = x_test.reshape(x_test.shape[0], img_rows * img_cols)
-X_train = x_train.astype("float32") / 255.0
-X_test = x_test.astype("float32") / 255.0
+# x_train = x_train.reshape(x_train.shape[0], img_rows * img_cols)
+# x_test = x_test.reshape(x_test.shape[0], img_rows * img_cols)
+x_train = x_train.astype("float32") / 255.0
+x_test = x_test.astype("float32") / 255.0
 
 # Convert class vectors to binary class matrices, e.g. "1" ==> [0,1,0,0,0,0,0,0,0,0]
 # 转换类向量成二进制矩阵，如"1" ==> [0,1,0,0,0,0,0,0,0,0]
@@ -77,8 +76,11 @@ model = Sequential()
 # 最大池化层，dropout层和dense/fully-connected 层.
 # Your code here.s
 # 输入层有784个神经元
-# 第一个隐层有512个神经元，激活函数为ReLu，Dropout比例为0.2
-model.add(Dense(512, input_shape=(784,), activation="relu"))
+# 6个3*3对28*28进行卷积
+model.add(
+    Conv2D(6, (3, 3), padding="valid", activation='relu', kernel_initializer='he_normal', input_shape=(28, 28, 1)))
+model.add(MaxPooling2D((2, 2), strides=(2, 2)))
+model.add(Flatten())
 
 # 第二个隐层有512个神经元，激活函数为ReLu，Dropout比例为0.2
 model.add(Dense(512, activation="relu"))
