@@ -108,7 +108,7 @@ with tf.Session() as sess:
     for i in range(num_epochs):
         # Each training epoch contains num_batches of parameter updates.
         total_loss = 0.0
-        for _ in range(num_batches):
+        for _ in range(int(num_batches)):
             # Fetch next mini-batch of data using TensorFlow's default method.
             x_batch, y_batch = mnist.train.next_batch(batch_size)
             # Note that we also need to include optimizer into the list in order to update parameters, but we

@@ -11,12 +11,17 @@ stops increasing, or using model ensembling techniques, etc.
 """
 
 from __future__ import print_function
+
+import os
+
 import keras
 from keras import backend as k
+from keras import optimizers
 from keras.datasets import mnist
-from keras.layers import Dense
+from keras.layers.core import Dense, Dropout, Activation
 from keras.models import Sequential
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 batch_size = 128
 num_classes = 10
 epochs = 20
@@ -47,7 +52,8 @@ else:
 # so that they are in the range of (0, 1) for (-1, 1)
 # Your code here.
 # 为了快速收敛，我们可以标准化输入值。所以它们的范围从（0，1）到（-1，1）
-# TODO 试试减去0.5的效果
+x_train = x_train.reshape(x_train.shape[0], img_rows * img_cols)
+x_test = x_test.reshape(x_test.shape[0], img_rows * img_cols)
 X_train = x_train.astype("float32") / 255.0
 X_test = x_test.astype("float32") / 255.0
 
@@ -69,18 +75,24 @@ model = Sequential()
 # max-pooling layers, dropout layers and dense/fully-connected layers.
 # 请建立简单的ConvNets通过堆积几个卷积层（核心大小为3x3）是个好的选择，不要忘记使用非线性激活给卷积层、
 # 最大池化层，dropout层和dense/fully-connected 层.
-# Your code here.
-model.add(Dense())
-# model.add(...)
+# Your code here.s
+# 输入层有784个神经元
+# 第一个隐层有512个神经元，激活函数为ReLu，Dropout比例为0.2
+model.add(Dense(512, input_shape=(784,), activation="relu"))
 
-model.add(Dense(num_classes, activation='softmax'))
+# 第二个隐层有512个神经元，激活函数为ReLu，Dropout比例为0.2
+model.add(Dense(512, activation="relu"))
+
+# 输出层有10个神经元，激活函数为SoftMax，得到分类结果
+model.add(Dense(10, activation="softmax"))
 
 # complete the loss and optimizer
 # Hints: use the cross-entropy loss, optimizer could be SGD or Adam, RMSProp, etc.
 # Feel free to try different hyper-parameters.
 # 计算损失函数和优化器。提示：使用交叉熵损失、优化器可以使用sgd或Adam, RMSProp。请随意尝试不同的超参数。
-model.compile(loss="Your code here",
-              optimizer="Your code here",
+sgd = optimizers.SGD(lr=.1, momentum=0.9, nesterov=True)
+model.compile(loss="categorical_crossentropy",
+              optimizer=sgd,
               metrics=['accuracy'])
 
 # Extra Points 1: use data augmentation in the progress of model training.
@@ -104,12 +116,10 @@ model.compile(loss="Your code here",
 #       x_train, y_train = ...
 #       model_i = train(x_train , y_train)
 
-
+#
 model.fit(x_train, y_train,
           batch_size=batch_size,
-          epochs=epochs,
-          verbose=1,
-          validation_data=(x_test, y_test))
+          epochs=epochs)
 score = model.evaluate(x_test, y_test, verbose=0)
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
